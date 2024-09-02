@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tabulator Nested Data Table</title>
+    <link href="https://unpkg.com/tabulator-tables@5.4.4/dist/css/tabulator.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+
+        .table-container {
+            width: 50%;
+            margin: 20px auto;
+            border-collapse: collapse;
+        }
+
+        .main-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 10px;
+        }
+
+        .main-table th, .main-table td {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+
+        .main-table th {
+            background-color: #f4f4f4;
+        }
+
+        .toggle-button {
+            background-color: transparent;
+            border: none;
+            font-size: 16px;
+            cursor: pointer;
+            color: #007bff;
+        }
+
+        .toggle-button:hover {
+            color: #0056b3;
+        }
+
+        .action-button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+
+        .action-button:hover {
+            background-color: #0056b3;
+        }
+
+        .sortable {
+            cursor: pointer;
+        }
+
+        .sorted-asc::after {
+            content: '▲';
+        }
+
+        .sorted-desc::after {
+            content: '▼';
+        }
+
+        th input[type="text"] {
+            width: 8%;
+            padding: 5px;
+            margin-top: 5px;
+            box-sizing: border-box;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+        }
+
+        th input[type="text"]::placeholder {
+            color: #aaa;
+        }
+
+        #example-table {
+            margin-top: 20px;
+        }
+
+        .tabulator-header {
+            background-color: #f4f4f4;
+        }
+
+        .tabulator-row {
+            border-bottom: 1px solid #ddd;
+        }
+
+        .tabulator-cell {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+
+        .tabulator-row .tabulator-cell {
+            background-color: #fff;
+        }
+
+        .tabulator-row:hover .tabulator-cell {
+            background-color: #f0f0f0;
+        }
+
+        .tabulator-row .tabulator-cell input[type="text"] {
+            width: 100%;
+            padding: 5px;
+            margin: 0;
+            box-sizing: border-box;
+            border-radius: 4px;
+            border: 1px solid #ffffff;
+        }
+
+        .sub-table-container {
+            display: none;
+            padding: 10px;
+            width: 90%;
+            border-top: 1px solid #ddd;
+            border-left: 1px solid #ddd;
+            border-right: 1px solid #ddd;
+            margin: 10px 40px;
+        }
+
+        .toggle-icon {
+            cursor: pointer;
+            font-size: 18px;
+            color: #007bff;
+            margin-left: 10px;
+        }
+
+        .toggle-icon:hover {
+            color: #0056b3;
+        }
+
+        /* Status colors */
+        .status-completed {
+            color: green;
+        }
+
+        .status-in-progress {
+            color: orange;
+        }
+
+        .status-pending {
+            color: red;
+        }
+
+    </style>
+</head>
+<body>
+
+
+    <div id="example-table"></div>
+
+    <script src="https://unpkg.com/tabulator-tables@5.4.4/dist/js/tabulator.min.js"></script>
+    <script>
+        // Define the table data with nested structure
+        const Orders = [
+            {
+                OrderNo: "5321",
+                OrderType: "Dine in",
+                WaiterName: "John",
+                Status: "In-Progress",
+                TAT: 25,
+                Feedback: "Order is taking longer than expected",
+                items: [
+                    {
+                        itemName: "Grilled Chicken",
+                        Status: "In-Progress",
+                        TAT: 20,
+                    }
+                ]
+            },
+            {
+                OrderNo: "5322",
+                OrderType: "Takeaway",
+                WaiterName: "Emily",
+                Status: "Completed",
+                TAT: 15,
+                Feedback: "Order was quick and accurate",
+                items: [
+                    {
+                        itemName: "Veggie Burger",
+                        Status: "Completed",
+                        TAT: 10,
+                    }
+                ]
+            },
+            {
+                OrderNo: "5323",
+                OrderType: "Online",
+                WaiterName: "Michael",
+                Status: "Pending",
+                TAT: 40,
+                Feedback: "Waiting for confirmation",
+                items: [
+                    {
+                        itemName: "Pasta",
+                        Status: "Pending",
+                        TAT: 35,
+                    }
+                ]
+            },
+            {
+                OrderNo: "5324",
+                OrderType: "Dine in",
+                WaiterName: "Sarah",
+                Status: "In-Progress",
+                TAT: 30,
+                Feedback: "Order is being prepared",
+                items: [
+                    {
+                        itemName: "Steak",
+                        Status: "In-Progress",
+                        TAT: 25,
+                    }
+                ]
+            },
+            {
+                OrderNo: "5325",
+                OrderType: "Takeaway",
+                WaiterName: "James",
+                Status: "Completed",
+                TAT: 20,
+                Feedback: "Good service",
+                items: [
+                    {
+                        itemName: "Salad",
+                        Status: "Completed",
+                        TAT: 15,
+                    }
+                ]
+            },
+            {
+                OrderNo: "5326",
+                OrderType: "Online",
+                WaiterName: "Anna",
+                Status: "Pending",
+                TAT: 50,
+                Feedback: "Awaiting pickup",
+                items: [
+                    {
+                        itemName: "Pizza",
+                        Status: "Pending",
+                        TAT: 45,
+                    }
+                ]
+            },
+            {
+                OrderNo: "5327",
+                OrderType: "Dine in",
+                WaiterName: "Chris",
+                Status: "In-Progress",
+                TAT: 35,
+                Feedback: "Waiting for main course",
+                items: [
+                    {
+                        itemName: "Sushi",
+                        Status: "In-Progress",
+                        TAT: 30,
+                    }
+                ]
+            },
+            {
+                OrderNo: "5328",
+                OrderType: "Takeaway",
+                WaiterName: "Laura",
+                Status: "Completed",
+                TAT: 25,
+                Feedback: "Order was well packed",
+                items: [
+                    {
+                        itemName: "Sandwich",
+                        Status: "Completed",
+                        TAT: 20,
+                    }
+                ]
+            }
+            , {
+                OrderNo: "5321",
+                OrderType: "Dine in",
+                WaiterName: "John",
+                Status: "In-Progress",
+                TAT: 25,
+                Feedback: "Order is taking longer than expected",
+                items: [
+                    {
+                        itemName: "Grilled Chicken",
+                        Status: "In-Progress",
+                        TAT: 20,
+                    }
+                ]
+            },
+            {
+                OrderNo: "5322",
+                OrderType: "Takeaway",
+                WaiterName: "Emily",
+                Status: "Completed",
+                TAT: 15,
+                Feedback: "Order was quick and accurate",
+                items: [
+                    {
+                        itemName: "Veggie Burger",
+                        Status: "Completed",
+                        TAT: 10,
+                    }
+                ]
+            },
+            {
+                OrderNo: "5323",
+                OrderType: "Online",
+                WaiterName: "Michael",
+                Status: "Pending",
+                TAT: 40,
+                Feedback: "Waiting for confirmation",
+                items: [
+                    {
+                        itemName: "Pasta",
+                        Status: "Pending",
+                        TAT: 35,
+                    }
+                ]
+            },
+            {
+                OrderNo: "5324",
+                OrderType: "Dine in",
+                WaiterName: "Sarah",
+                Status: "In-Progress",
+                TAT: 30,
+                Feedback: "Order is being prepared",
+                items: [
+                    {
+                        itemName: "Steak",
+                        Status: "In-Progress",
+                        TAT: 25,
+                    }
+                ]
+            },
+            {
+                OrderNo: "5325",
+                OrderType: "Takeaway",
+                WaiterName: "James",
+                Status: "Completed",
+                TAT: 20,
+                Feedback: "Good service",
+                items: [
+                    {
+                        itemName: "Salad",
+                        Status: "Completed",
+                        TAT: 15,
+                    }
+                ]
+            },
+            {
+                OrderNo: "5326",
+                OrderType: "Online",
+                WaiterName: "Anna",
+                Status: "Pending",
+                TAT: 50,
+                Feedback: "Awaiting pickup",
+                items: [
+                    {
+                        itemName: "Pizza",
+                        Status: "Pending",
+                        TAT: 45,
+                    }
+                ]
+            },
+            {
+                OrderNo: "5327",
+                OrderType: "Dine in",
+                WaiterName: "Chris",
+                Status: "In-Progress",
+                TAT: 35,
+                Feedback: "Waiting for main course",
+                items: [
+                    {
+                        itemName: "Sushi",
+                        Status: "In-Progress",
+                        TAT: 30,
+                    }
+                ]
+            },
+            {
+                OrderNo: "5328",
+                OrderType: "Takeaway",
+                WaiterName: "Laura",
+                Status: "Completed",
+                TAT: 25,
+                Feedback: "Order was well packed",
+                items: [
+                    {
+                        itemName: "Sandwich",
+                        Status: "Completed",
+                        TAT: 20,
+                    }
+                ]
+            }
+            , {
+                OrderNo: "5321",
+                OrderType: "Dine in",
+                WaiterName: "John",
+                Status: "In-Progress",
+                TAT: 25,
+                Feedback: "Order is taking longer than expected",
+                items: [
+                    {
+                        itemName: "Grilled Chicken",
+                        Status: "In-Progress",
+                        TAT: 20,
+                    }
+                ]
+            },
+            {
+                OrderNo: "5322",
+                OrderType: "Takeaway",
+                WaiterName: "Emily",
+                Status: "Completed",
+                TAT: 15,
+                Feedback: "Order was quick and accurate",
+                items: [
+                    {
+                        itemName: "Veggie Burger",
+                        Status: "Completed",
+                        TAT: 10,
+                    }
+                ]
+            },
+            {
+                OrderNo: "5323",
+                OrderType: "Online",
+                WaiterName: "Michael",
+                Status: "Pending",
+                TAT: 40,
+                Feedback: "Waiting for confirmation",
+                items: [
+                    {
+                        itemName: "Pasta",
+                        Status: "Pending",
+                        TAT: 35,
+                    }
+                ]
+            },
+            {
+                OrderNo: "5324",
+                OrderType: "Dine in",
+                WaiterName: "Sarah",
+                Status: "In-Progress",
+                TAT: 30,
+                Feedback: "Order is being prepared",
+                items: [
+                    {
+                        itemName: "Steak",
+                        Status: "In-Progress",
+                        TAT: 25,
+                    }
+                ]
+            },
+            {
+                OrderNo: "5325",
+                OrderType: "Takeaway",
+                WaiterName: "James",
+                Status: "Completed",
+                TAT: 20,
+                Feedback: "Good service",
+                items: [
+                    {
+                        itemName: "Salad",
+                        Status: "Completed",
+                        TAT: 15,
+                    }
+                ]
+            },
+            {
+                OrderNo: "5326",
+                OrderType: "Online",
+                WaiterName: "Anna",
+                Status: "Pending",
+                TAT: 50,
+                Feedback: "Awaiting pickup",
+                items: [
+                    {
+                        itemName: "Pizza",
+                        Status: "Pending",
+                        TAT: 45,
+                    }
+                ]
+            },
+            {
+                OrderNo: "5327",
+                OrderType: "Dine in",
+                WaiterName: "Chris",
+                Status: "In-Progress",
+                TAT: 35,
+                Feedback: "Waiting for main course",
+                items: [
+                    {
+                        itemName: "Sushi",
+                        Status: "In-Progress",
+                        TAT: 30,
+                    }
+                ]
+            },
+            {
+                OrderNo: "5328",
+                OrderType: "Takeaway",
+                WaiterName: "Laura",
+                Status: "Completed",
+                TAT: 25,
+                Feedback: "Order was well packed",
+                items: [
+                    {
+                        itemName: "Sandwich",
+                        Status: "Completed",
+                        TAT: 20,
+                    }
+                ]
+            }
+            , {
+                OrderNo: "5321",
+                OrderType: "Dine in",
+                WaiterName: "John",
+                Status: "In-Progress",
+                TAT: 25,
+                Feedback: "Order is taking longer than expected",
+                items: [
+                    {
+                        itemName: "Grilled Chicken",
+                        Status: "In-Progress",
+                        TAT: 20,
+                    }
+                ]
+            },
+            {
+                OrderNo: "5322",
+                OrderType: "Takeaway",
+                WaiterName: "Emily",
+                Status: "Completed",
+                TAT: 15,
+                Feedback: "Order was quick and accurate",
+                items: [
+                    {
+                        itemName: "Veggie Burger",
+                        Status: "Completed",
+                        TAT: 10,
+                    }
+                ]
+            },
+            {
+                OrderNo: "5323",
+                OrderType: "Online",
+                WaiterName: "Michael",
+                Status: "Pending",
+                TAT: 40,
+                Feedback: "Waiting for confirmation",
+                items: [
+                    {
+                        itemName: "Pasta",
+                        Status: "Pending",
+                        TAT: 35,
+                    }
+                ]
+            },
+            {
+                OrderNo: "5324",
+                OrderType: "Dine in",
+                WaiterName: "Sarah",
+                Status: "In-Progress",
+                TAT: 30,
+                Feedback: "Order is being prepared",
+                items: [
+                    {
+                        itemName: "Steak",
+                        Status: "In-Progress",
+                        TAT: 25,
+                    }
+                ]
+            },
+            {
+                OrderNo: "5325",
+                OrderType: "Takeaway",
+                WaiterName: "James",
+                Status: "Completed",
+                TAT: 20,
+                Feedback: "Good service",
+                items: [
+                    {
+                        itemName: "Salad",
+                        Status: "Completed",
+                        TAT: 15,
+                    }
+                ]
+            },
+            {
+                OrderNo: "5326",
+                OrderType: "Online",
+                WaiterName: "Anna",
+                Status: "Pending",
+                TAT: 50,
+                Feedback: "Awaiting pickup",
+                items: [
+                    {
+                        itemName: "Pizza",
+                        Status: "Pending",
+                        TAT: 45,
+                    }
+                ]
+            },
+            {
+                OrderNo: "5327",
+                OrderType: "Dine in",
+                WaiterName: "Chris",
+                Status: "In-Progress",
+                TAT: 35,
+                Feedback: "Waiting for main course",
+                items: [
+                    {
+                        itemName: "Sushi",
+                        Status: "In-Progress",
+                        TAT: 30,
+                    }
+                ]
+            },
+            {
+                OrderNo: "5328",
+                OrderType: "Takeaway",
+                WaiterName: "Laura",
+                Status: "Completed",
+                TAT: 25,
+                Feedback: "Order was well packed",
+                items: [
+                    {
+                        itemName: "Sandwich",
+                        Status: "Completed",
+                        TAT: 20,
+                    }
+                ]
+            }
+   
+        ];
+
+        // Define the main table with pagination and dataTree configuration
+        var table = new Tabulator("#example-table", {
+            height: "515px",
+            layout: "fitColumns",
+            pagination: "local",
+            paginationSize: 10,
+            columnDefaults: {
+                resizable: true,
+            },
+            data: Orders,
+            columns: [
+                {
+                    title: "",
+                    width: 30,
+                    formatter: function (cell, formatterParams, onRendered) {
+                        return "<i class='fas fa-plus toggle-icon' title='Show Details'></i>";
+                    },
+                    cellClick: function (e, cell) {
+                        var row = cell.getRow();
+                        var subTableContainer = row.getElement().querySelector('.sub-table-container');
+                        var icon = cell.getElement().querySelector('.toggle-icon');
+
+                        if (subTableContainer.style.display === "none") {
+                            subTableContainer.style.display = "block";
+                            icon.classList.remove('fa-plus');
+                            icon.classList.add('fa-minus');
+                            icon.setAttribute('title', 'Hide Details');
+                        } else {
+                            subTableContainer.style.display = "none";
+                            icon.classList.remove('fa-minus');
+                            icon.classList.add('fa-plus');
+                            icon.setAttribute('title', 'Show Details');
+                        }
+                    }
+                },
+                { title: "Order No ", field: "OrderNo",headerFilter:"input" },
+                { title: "Order Type", field: "OrderType"},
+                { title: "Waiter Name ", field: "WaiterName",headerFilter:"input"},
+                {
+                    title: "Status ",
+                    field: "Status",
+                    formatter: function (cell, formatterParams, onRendered) {
+                        const status = cell.getValue();
+                        switch (status) {
+                            case "Completed":
+                                cell.getElement().classList.add("status-completed");
+                                break;
+                            case "In-Progress":
+                                cell.getElement().classList.add("status-in-progress");
+                                break;
+                            case "Pending":
+                                cell.getElement().classList.add("status-pending");
+                                break;
+                        }
+                        return status;
+                    }
+                },
+                { title: "TAT ", field: "TAT",headerFilter:"input" },
+                { title: "Feedback", field: "Feedback"},
+            ],
+            rowFormatter: function (row) {
+                var subTableContainer = document.createElement('div');
+                subTableContainer.classList.add('sub-table-container');
+
+                var subTable = new Tabulator(subTableContainer, {
+                    data: row.getData().items,
+                    layout: "fitColumns",
+                    columns: [
+                        { title: "Item Name", field: "itemName"},
+                        {
+                            title: "Status",
+                            field: "Status",
+                            formatter: function (cell, formatterParams, onRendered) {
+                                const status = cell.getValue();
+                                switch (status) {
+                                    case "Completed":
+                                        cell.getElement().classList.add("status-completed");
+                                        break;
+                                    case "In-Progress":
+                                        cell.getElement().classList.add("status-in-progress");
+                                        break;
+                                    case "Pending":
+                                        cell.getElement().classList.add("status-pending");
+                                        break;
+                                }
+                                return status;
+                            }
+                        },
+                        { title: "TAT", field: "TAT"},
+                    ],
+                });
+
+                row.getElement().appendChild(subTableContainer);
+            },
+        });
+
+    </script>
+</body>
+</html>

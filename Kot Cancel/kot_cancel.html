@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kot_cancle_Orders</title>
+    <link href="https://unpkg.com/tabulator-tables@5.4.4/dist/css/tabulator.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+
+        .table-container {
+            width: 50%;
+            margin: 20px auto;
+            border-collapse: collapse;
+        }
+
+        .main-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 10px;
+        }
+
+        .main-table th, .main-table td {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+
+        .main-table th {
+            background-color: #f4f4f4;
+        }
+
+        .toggle-button {
+            background-color: transparent;
+            border: none;
+            font-size: 16px;
+            cursor: pointer;
+            color: #007bff;
+        }
+
+        .toggle-button:hover {
+            color: #0056b3;
+        }
+
+        .action-button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+
+        .action-button:hover {
+            background-color: #0056b3;
+        }
+
+        .sortable {
+            cursor: pointer;
+        }
+
+        .sorted-asc::after {
+            content: '▲';
+        }
+
+        .sorted-desc::after {
+            content: '▼';
+        }
+
+        th input[type="text"] {
+            width: 8%;
+            padding: 5px;
+            margin-top: 5px;
+            box-sizing: border-box;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+        }
+
+        th input[type="text"]::placeholder {
+            color: #aaa;
+        }
+
+        #example-table {
+            margin-top: 20px;
+        }
+
+        .tabulator-header {
+            background-color: #f4f4f4;
+        }
+
+        .tabulator-row {
+            border-bottom: 1px solid #ddd;
+        }
+
+        .tabulator-cell {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+
+        .tabulator-row .tabulator-cell {
+            background-color: #fff;
+        }
+
+        .tabulator-row:hover .tabulator-cell {
+            background-color: #f0f0f0;
+        }
+
+        .tabulator-row .tabulator-cell input[type="text"] {
+            width: 100%;
+            padding: 5px;
+            margin: 0;
+            box-sizing: border-box;
+            border-radius: 4px;
+            border: 1px solid #ffffff;
+        }
+
+        .sub-table-container {
+            display: none;
+            padding: 10px;
+            width: 90%;
+            border-top: 1px solid #ddd;
+            border-left: 1px solid #ddd;
+            border-right: 1px solid #ddd;
+            margin: 10px 40px;
+        }
+
+        .toggle-icon {
+            cursor: pointer;
+            font-size: 18px;
+            color: #007bff;
+            margin-left: 10px;
+        }
+
+        .toggle-icon:hover {
+            color: #0056b3;
+        }
+
+        /* Status colors */
+        .status-completed {
+            color: green;
+        }
+
+        .status-in-progress {
+            color: orange;
+        }
+
+        .status-pending {
+            color: red;
+        }
+
+    </style>
+</head>
+<body>
+
+    <h2 style="text-align: center;">Kitchen cancel Orders</h2>
+    <div id="example-table"></div>
+
+    <script src="https://unpkg.com/tabulator-tables@5.4.4/dist/js/tabulator.min.js"></script>
+    <script>
+        // Define the table data with nested structure
+        const Kot_cancle_Orders = [
+    {
+        SNo: "1",
+        CustomerName: "John Doe",
+        MobileNumber: "123-456-7890",
+        ReasonForCancle: "time taken(peak time)",
+        items: [
+            {
+                itemName: "Grilled Chicken",
+                price: "599",
+            }
+        ]
+    },
+    {
+        SNo: "2",
+        CustomerName: "Jane Smith",
+        MobileNumber: "987-654-3210",
+        ReasonForCancle: "out of stock",
+        items: [
+            {
+                itemName: "Pasta",
+                price: "99",
+            }
+        ]
+    }
+];
+
+var table = new Tabulator("#example-table", {
+    height: "515px",
+    layout: "fitColumns",
+    pagination: "local",
+    paginationSize: 10,
+    columnDefaults: {
+        resizable: true,
+    },
+    data: Kot_cancle_Orders,
+    columns: [
+        {
+            title: "",
+            width: 30,
+            formatter: function (cell, formatterParams, onRendered) {
+                return "<i class='fas fa-plus toggle-icon' title='Show Details'></i>";
+            },
+            cellClick: function (e, cell) {
+                var row = cell.getRow();
+                var subTableContainer = row.getElement().querySelector('.sub-table-container');
+                var icon = cell.getElement().querySelector('.toggle-icon');
+
+                if (subTableContainer.style.display === "none") {
+                    subTableContainer.style.display = "block";
+                    icon.classList.remove('fa-plus');
+                    icon.classList.add('fa-minus');
+                    icon.setAttribute('title', 'Hide Details');
+                } else {
+                    subTableContainer.style.display = "none";
+                    icon.classList.remove('fa-minus');
+                    icon.classList.add('fa-plus');
+                    icon.setAttribute('title', 'Show Details');
+                }
+            }
+        },
+        { title: "S.No", field: "SNo", headerFilter: "input" },
+        { title: "Customer Name", field: "CustomerName", headerFilter: "input" },
+        { title: "Mobile Number", field: "MobileNumber", headerFilter: "input" },
+        { title: "Reason for Cancle", field: "ReasonForCancle" }
+    ],
+    rowFormatter: function (row) {
+        var subTableContainer = document.createElement('div');
+        subTableContainer.classList.add('sub-table-container');
+
+        var subTable = new Tabulator(subTableContainer, {
+            data: row.getData().items,
+            layout: "fitColumns",
+            columns: [
+                { title: "Item Name", field: "itemName" },
+                { title: "Price", field: "price" },
+            ],
+        });
+
+        row.getElement().appendChild(subTableContainer);
+    },
+});
+
+    </script>
+</body>
+</html>
